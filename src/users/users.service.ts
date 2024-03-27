@@ -8,7 +8,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, ObjectId } from 'mongoose';
 import { User } from 'src/schemas/user.schema';
 import { createUserDto } from './dto/create-user.dto';
-import { objectOmitKeys } from 'src/common/utils/object-omit-key.util';
+import { updateUserDto } from './dto/update-user.dto';
+
+export interface successMessage {
+  message: string;
+  timestamp: string;
+}
 
 @Injectable()
 export class UsersService {
@@ -61,5 +66,47 @@ export class UsersService {
     }
     await newUser.save();
     return newUser;
+  }
+
+  async update(id: string, changes: updateUserDto) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const user = await this.userModel.findById(id).exec();
+    const { phone, email } = changes;
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const userInDb = await this.userModel
+      .findOne()
+      .or([{ email }, { phone }])
+      .exec();
+    if (userInDb && userInDb._id.toString() !== id) {
+      throw new ConflictException(
+        'User with this email or phone already exists',
+      );
+    }
+    const isChanged = Object.keys(changes).some(
+      (key) => user[key] !== changes[key],
+    );
+    await this.userModel.findByIdAndUpdate(id, changes).exec();
+    return {
+      message: isChanged ? 'Successfully updated user' : 'Nothing to update',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async delete(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+    const result = await this.userModel.deleteOne({ _id: id });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('User not found');
+    }
+    return {
+      message: 'Successfully deleted user',
+      timestamp: new Date().toISOString(),
+    };
   }
 }

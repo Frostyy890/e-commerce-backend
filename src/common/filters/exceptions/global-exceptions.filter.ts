@@ -18,20 +18,21 @@ export class AllExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const res = ctx.getResponse<Response>();
     const req = ctx.getRequest<Request>();
-
     let status: HttpStatus;
     let errorType: string;
     let errorMessage: string;
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const errorResponse = exception.getResponse();
-      errorType =
-        (errorResponse as HttpExceptionResponse).error || exception.message;
-      errorMessage = (errorResponse as HttpExceptionResponse).message;
+      errorType = (errorResponse as HttpExceptionResponse).error;
+      errorMessage =
+        (errorResponse as HttpExceptionResponse).message || exception.message;
     } else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      errorType = 'Critical internal server error';
+      errorType = 'Internal Server Error';
+      errorMessage = 'An unexpected error occurred';
     }
+
     const errorResponse = this.getErrorResponse(
       status,
       errorType,
@@ -45,7 +46,7 @@ export class AllExceptionFilter implements ExceptionFilter {
   private getErrorResponse = (
     status: HttpStatus,
     errorType: string,
-    errorMessage,
+    errorMessage: string,
     req: Request,
   ): CustomHttpExceptionResponse => ({
     statusCode: status,

@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, ObjectId } from 'mongoose';
@@ -39,6 +40,23 @@ export class UsersService {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
       throw new NotFoundException('User not found');
+    } else
+      return {
+        _id: user._id,
+        fname: user.fname,
+        lname: user.lname,
+        phone: user.phone,
+        email: user.email,
+        password: user.password,
+        role: user.role,
+        isActive: user.isActive,
+      };
+  }
+
+  async getByEmail(email: string) {
+    const user = await this.userModel.findOne({ email }).exec();
+    if (!user) {
+      throw new UnauthorizedException('Invalid Email');
     } else
       return {
         _id: user._id,

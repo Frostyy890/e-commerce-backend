@@ -5,6 +5,9 @@ import {
   IsString,
   Matches,
   MinLength,
+  IsStrongPassword,
+  IsBoolean,
+  IsOptional,
 } from 'class-validator';
 export class createUserDto {
   // First Name
@@ -31,6 +34,10 @@ export class createUserDto {
   // Password
   @IsString()
   @IsNotEmpty()
+  @IsStrongPassword()
   @MinLength(8)
   readonly password: string;
+  @IsOptional()
+  @IsBoolean()
+  readonly isActive: boolean;
 }

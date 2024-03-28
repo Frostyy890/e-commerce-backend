@@ -11,6 +11,7 @@ import { UsersService, successMessage } from './users.service';
 import { User } from 'src/schemas/user.schema';
 import { createUserDto } from './dto/create-user.dto';
 import { updateUserDto } from './dto/update-user.dto';
+import { userEmailDto } from './dto/user-email.dto';
 
 @Controller('users')
 export class UsersController {
@@ -18,6 +19,11 @@ export class UsersController {
   @Get()
   async getAllUsers(): Promise<User[]> {
     return this.UserService.getAll();
+  }
+
+  @Get('by-email/:email')
+  async getUserByEmail(@Param() params: userEmailDto): Promise<User> {
+    return this.UserService.getByEmail(params.email);
   }
   @Get(':id')
   async getUserById(@Param('id') id: string): Promise<User> {

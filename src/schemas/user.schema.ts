@@ -38,8 +38,9 @@ UserSchema.pre('save', async function save(next) {
   }
 });
 
-UserSchema.methods.validatePassword = async function validatePassword(
+export async function validatePassword(
   password: string,
-): Promise<boolean> {
-  return compare(password, this.password);
-};
+  existingPassword: string,
+): Promise<Boolean> {
+  return compare(password, existingPassword);
+}

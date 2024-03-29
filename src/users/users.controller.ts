@@ -12,10 +12,12 @@ import { User } from 'src/schemas/user.schema';
 import { createUserDto } from './dto/create-user.dto';
 import { updateUserDto } from './dto/update-user.dto';
 import { userEmailDto } from './dto/user-email.dto';
+import { Public } from 'src/common/custom-decorators/public.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly UserService: UsersService) {}
+  @Public()
   @Get()
   async getAllUsers(): Promise<User[]> {
     return this.UserService.getAll();
@@ -25,7 +27,9 @@ export class UsersController {
   async getUserByEmail(@Param() params: userEmailDto): Promise<User> {
     return this.UserService.getByEmail(params.email);
   }
+
   @Get(':id')
+  // @UseGuards(AuthGuard)
   async getUserById(@Param('id') id: string): Promise<User> {
     return this.UserService.getById(id);
   }
